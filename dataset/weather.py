@@ -33,7 +33,8 @@ class WeatherGrabber:
         utc_tag = str(utc).rjust(3, "0")  # add leading 0s
         filename = f'{date.strftime("%Y%m%d")}_{utc_tag}.grib'
         if date.year < datetime.date.today().year:
-            filename = f"{date.year}/{filename}"
+            if date.year != 2020:  # FIXME: 2020 data does not have a 2020/ folder yet
+                filename = f"{date.year}/{filename}"
         # 1. check if local data exist
         localpath = os.path.join(self.cache_dir, filename)
         if os.path.exists(localpath):
@@ -41,12 +42,12 @@ class WeatherGrabber:
             return localpath
         # 2. otherwise download it
         url = os.path.join(self.GRIB_URL, filename)
-        #print(f"Downloading data: {url}")
+        # print(f"Downloading data: {url}")
         response = requests.get(url, stream=True)
         if response.status_code != 200:
             raise Exception(f"Failed to download {url}")
         os.makedirs(os.path.dirname(localpath), exist_ok=True)
         with open(localpath, "wb") as f:
-            for data in response.iter_content(): #tqdm(response.iter_content()):
+            for data in response.iter_content():  # tqdm(response.iter_content()):
                 f.write(data)
         return localpath
