@@ -16,6 +16,7 @@ selenium = "*"
 tqdm = "*"
 scikit-image = "*"
 regionmask = "*"
+geopy = "*"
 
 [requires]
 python_version = "3.8"

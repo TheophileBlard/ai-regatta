@@ -29,6 +29,7 @@ class APIKeyGenerator:
     SLEEP_TIME = 10
     X_OFFSET, Y_OFFSET = 200, 200
     API_KEY_STR = "x-api-key"
+    MAX_RETRIES = 5 # Max retries get new key
 
     def __init__(self, chrome_driver_path=DEFAULT_DRIVER_PATH):
         if not chrome_driver_path.exists():
@@ -45,7 +46,7 @@ class APIKeyGenerator:
             chrome_driver_path, options=chrome_options, desired_capabilities=caps
         )
 
-    def get_new_key(self):
+    def _try_get_key(self):
         print("Regenerating new key...")
         self.driver.get(self.GAME_URL)
         time.sleep(self.SLEEP_TIME)
@@ -63,8 +64,14 @@ class APIKeyGenerator:
         api_key = self._get_api_key_from_logs(logs)
         if len(api_key) == 0:
             raise Exception("Failed to get API Key!")
-
         return api_key
+
+    def get_new_key(self):
+        for i in range(0, self.MAX_RETRIES):
+            try:
+                return self._try_get_key()
+            except Exception as e:
+                print(e, f" => Retry ({i+1}/{self.MAX_RETRIES})")
 
     def __del__(self):
         pass
